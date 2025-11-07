@@ -8,5 +8,9 @@ git submodule sync
 git submodule update --init --recursive
 
 
-uv sync --python /opt/conda/envs/py_3.12/bin/python
+uv venv --python /opt/conda/envs/py_3.12/bin/python .venv
+uv pip install -r requirements.txt
+uv pip install cmake ninja
+python tools/amd_build/build_amd.py
+python setup.py bdist_wheel > build.log 2>&1
 
