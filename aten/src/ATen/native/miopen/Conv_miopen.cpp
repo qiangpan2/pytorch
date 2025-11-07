@@ -763,7 +763,7 @@ Tensor miopen_convolution_forward(
 
   auto memory_format = at::MemoryFormat::Contiguous;
   if (miopen_conv_use_channels_last(*input, *weight)) {
-    memory_format = (weight->ndimension() == 5) ? /*at::MemoryFormat::ChannelsLast3d*/at::MemoryFormat::Contiguous : at::MemoryFormat::ChannelsLast;
+    memory_format = (weight->ndimension() == 5) ? at::MemoryFormat::ChannelsLast3d : at::MemoryFormat::ChannelsLast;
   }
 
   Tensor output_t = at::detail::empty_cuda(
