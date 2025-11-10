@@ -391,3 +391,22 @@ android/pytorch_android_torchvision/.cxx
 .arcconfig
 .stable_pyre_client
 .pyre_client
+
+
+# Hide ROCm implementation noise
+/aten/src/ATen/hip/
+/c10/hip/
+/aten/src/THH/
+/aten/src/ATen/test/hip/
+/aten/src/ATen/test/test_install/hip/
+/aten/src/ATen/native/hip/
+/aten/src/ATen/native/nested/hip/
+aten/src/ATen/native/cudnn/hip/
+aten/src/ATen/native/quantized/cudnn/hip/
+aten/src/ATen/native/quantized/hip/
+aten/src/ATen/native/sparse/hip/
+aten/src/ATen/native/transformers/hip/
+aten/src/ATen/native/transformers/hip/
+aten/src/ATen/native/transformers/hip/
+aten/src/ATen/native/transformers/hip/
+aten/src/ATen/native/transformers/hip/

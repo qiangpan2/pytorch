@@ -10,12 +10,12 @@ git submodule update --init --recursive
 
 uv venv --python /opt/conda/envs/py_3.12/bin/python .venv
 uv pip install -r requirements.txt
-uv pip install cmake ninja
+uv pip install "amdsmi @ file:///opt/rocm-6.4.4/share/amd_smi"
 python tools/amd_build/build_amd.py
 
 #    USE_MKLDNN=0 
 #    USE_XNNPACK=0 
-PYTORCH_ROCM_ARCH="gfx1201" \
+PYTORCH_ROCM_ARCH="gfx1100;gfx1201" \
     CXXFLAGS="-Wno-uninitialized" \
     CFLAGS="-Wno-uninitialized" \
     python setup.py bdist_wheel > build.log 2>&1
