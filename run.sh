@@ -12,10 +12,11 @@ uv venv --python /opt/conda/envs/py_3.12/bin/python .venv
 uv pip install -r requirements.txt
 uv pip install cmake ninja
 python tools/amd_build/build_amd.py
-PYTORCH_ROCM_ARCH="gfx1100" \
+
+#    USE_MKLDNN=0 
+#    USE_XNNPACK=0 
+PYTORCH_ROCM_ARCH="gfx1201" \
     CXXFLAGS="-Wno-uninitialized" \
     CFLAGS="-Wno-uninitialized" \
-    USE_MKLDNN=0 \
-    USE_XNNPACK=0 \
     python setup.py bdist_wheel > build.log 2>&1
 
