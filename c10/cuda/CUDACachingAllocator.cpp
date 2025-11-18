@@ -2595,9 +2595,16 @@ class DeviceCachingAllocator {
     } else if (size < kMinLargeAlloc) { //for 10MB
       return kLargeBuffer;
     } else {
-      for (size_t fixed_size : user_fixed_reuse_sizes) {
-        if (size <= fixed_size) {
-          return fixed_size;  // Use the fixed size for reuse
+       // Only apply fixed reuse sizes if request is within the configured range
+      if (!user_fixed_reuse_sizes.empty()) {
+        size_t min_fixed_size = user_fixed_reuse_sizes.front();
+        size_t max_fixed_size = user_fixed_reuse_sizes.back();
+        if (size >= min_fixed_size && size <= max_fixed_size) {
+          for (size_t fixed_size : user_fixed_reuse_sizes) {
+            if (size <= fixed_size) {
+              return fixed_size;  // Use the fixed size for reuse
+            }
+          }
         }
       }
 
