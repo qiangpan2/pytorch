@@ -20,3 +20,6 @@ PYTORCH_ROCM_ARCH="gfx1100;gfx1201" \
     CFLAGS="-Wno-uninitialized" \
     python setup.py bdist_wheel > build.log 2>&1
 
+# 2MB X 
+export PYTORCH_CUDA_FIXED_REUSE_SIZES="674,500,1000"
+

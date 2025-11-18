@@ -52,6 +52,47 @@ using namespace c10::CachingDeviceAllocator;
 const size_t kLargeBuffer =
     20971520; // "large" allocations may be packed in 20 MiB blocks
 
+//store configured fixed sizes for reuse
+static std::vector<size_t> user_fixed_reuse_sizes;
+
+
+// Function to initialize fixed reuse sizes from environment variable
+static void initializeFixedSizesFromEnv() {
+  const char* env_var = std::getenv("PYTORCH_CUDA_FIXED_REUSE_SIZES");
+  if (env_var != nullptr) {
+    std::string env_str(env_var);
+    std::stringstream ss(env_str);
+    std::string item;
+
+    while (std::getline(ss, item, ',')) {
+      // Trim whitespace
+      item.erase(0, item.find_first_not_of(" \t\r\n"));
+      item.erase(item.find_last_not_of(" \t\r\n") + 1);
+
+      if (!item.empty()) {
+        try {
+          // Parse the size as MB and convert to bytes
+          size_t mb_size = std::stoull(item);
+          size_t byte_size = mb_size * 1024 * 1024; // Convert MB to bytes
+          user_fixed_reuse_sizes.push_back(byte_size);
+        } catch (...) {
+          // If there's an error parsing, skip this entry
+          continue;
+        }
+      }
+    }
+
+    // Sort the sizes for efficient lookup
+    std::sort(user_fixed_reuse_sizes.begin(), user_fixed_reuse_sizes.end());
+  }
+}
+
+// Initialize on startup
+static bool initialized_fixed_sizes = []() {
+  initializeFixedSizesFromEnv();
+  return true;
+}();
+
 namespace Native {
 
 //
@@ -2549,11 +2590,17 @@ class DeviceCachingAllocator {
   }
 
   static size_t get_allocation_size(size_t size) {
-    if (size <= kSmallSize) {
+    if (size <= kSmallSize) {// for 1MB
       return kSmallBuffer;
-    } else if (size < kMinLargeAlloc) {
+    } else if (size < kMinLargeAlloc) { //for 10MB
       return kLargeBuffer;
     } else {
+      for (size_t fixed_size : user_fixed_reuse_sizes) {
+        if (size <= fixed_size) {
+          return fixed_size;  // Use the fixed size for reuse
+        }
+      }
+
       return kRoundLarge * ((size + kRoundLarge - 1) / kRoundLarge);
     }
   }
