@@ -312,7 +312,8 @@ constexpr uint32_t CUDA_THREADS_PER_BLOCK_FALLBACK = 256;
 #endif
 
 #if defined(USE_ROCM)
-#define C10_WARP_SIZE warpSize // = 64 or 32 (Defined in hip_runtime.h)
+// For ROCm 7.1+, warpSize is a device-side runtime value, not a compile-time constant.
+#define C10_WARP_SIZE 32
 #else
 #define C10_WARP_SIZE 32
 #endif
