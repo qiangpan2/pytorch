@@ -389,14 +389,6 @@ inline at::MemoryFormat miopen_conv_suggest_memory_format(const at::Tensor& inpu
     return at::MemoryFormat::ChannelsLast3d;
   }
 
-  if (suggest_nhwc && (weight_ndim == 4)) {
-    return at::MemoryFormat::ChannelsLast;
-  }
-
-  if (suggest_nhwc && (weight_ndim == 5)) {
-    return at::MemoryFormat::ChannelsLast3d;
-  }
-
   return at::MemoryFormat::Contiguous;
 }
 
