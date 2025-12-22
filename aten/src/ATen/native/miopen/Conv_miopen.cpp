@@ -411,7 +411,20 @@ struct algorithm_search<miopenConvFwdAlgorithm_t> {
         // now what? fall through and hope for the best
     }
 
-    return solutions[0];
+
+    constexpr size_t MAX_ACCEPTABLE_WORKSPACE = 100 * 1024 * 1024; // 100 MB limit
+    for (size_t i=0; i<solution_count; ++i) {
+        if (solutions[i].workspace_size == 0) {
+            return solutions[i];  // Prefer workspace-free solvers (like custom ChannelsLast WMMA)
+        }
+    }
+    for (size_t i=0; i<solution_count; ++i) {
+        if (solutions[i].workspace_size <= MAX_ACCEPTABLE_WORKSPACE) {
+            return solutions[i];  
+        }
+    }
+
+    return solutions[0];  // Fall back
   }
 };
 
@@ -482,6 +495,19 @@ struct algorithm_search<miopenConvBwdDataAlgorithm_t> {
             }
         }
         // now what? fall through and hope for the best
+    }
+
+    // Prefer solvers with smaller workspace to avoid OOM
+    constexpr size_t MAX_ACCEPTABLE_WORKSPACE = 100 * 1024 * 1024; // 100 MB limit
+    for (size_t i=0; i<solution_count; ++i) {
+        if (solutions[i].workspace_size == 0) {
+            return solutions[i];
+        }
+    }
+    for (size_t i=0; i<solution_count; ++i) {
+        if (solutions[i].workspace_size <= MAX_ACCEPTABLE_WORKSPACE) {
+            return solutions[i];
+        }
     }
 
     return solutions[0];
@@ -555,6 +581,19 @@ struct algorithm_search<miopenConvBwdWeightsAlgorithm_t> {
             }
         }
         // now what? fall through and hope for the best
+    }
+
+    // Prefer solvers with smaller workspace to avoid OOM
+    constexpr size_t MAX_ACCEPTABLE_WORKSPACE = 100 * 1024 * 1024; // 100 MB limit
+    for (size_t i=0; i<solution_count; ++i) {
+        if (solutions[i].workspace_size == 0) {
+            return solutions[i];
+        }
+    }
+    for (size_t i=0; i<solution_count; ++i) {
+        if (solutions[i].workspace_size <= MAX_ACCEPTABLE_WORKSPACE) {
+            return solutions[i];
+        }
     }
 
     return solutions[0];
