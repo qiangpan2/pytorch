@@ -379,6 +379,21 @@ inline bool miopen_conv_use_channels_last(const at::Tensor& input, const at::Ten
       (input_memory_format  == at::MemoryFormat::ChannelsLast3d) ||
       (weight_memory_format == at::MemoryFormat::ChannelsLast3d);
 
+  if (PYTORCH_MIOPEN_SUGGEST_NHWC && *PYTORCH_MIOPEN_SUGGEST_NHWC) {
+    auto weight_dtype = weight.scalar_type();
+    bool is_fp16_or_bf16 = (weight_dtype == at::kHalf) || (weight_dtype == at::kBFloat16);
+    auto weight_ndim = weight.ndimension();
+    
+    if (is_fp16_or_bf16) {
+      if (weight_ndim == 4) {
+        return true;  // Force ChannelsLast for 2D conv
+      }
+      if (weight_ndim == 5) {
+        return true;  // Force ChannelsLast3d for 3D conv
+      }
+    }
+  }
+
   return can_use_miopen_channels_last_2d || can_use_miopen_channels_last_3d;
 }
 
