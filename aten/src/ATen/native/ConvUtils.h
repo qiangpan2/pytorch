@@ -389,6 +389,19 @@ inline at::MemoryFormat miopen_conv_suggest_memory_format(const at::Tensor& inpu
     return at::MemoryFormat::ChannelsLast3d;
   }
 
+  // Force ChannelsLast/ChannelsLast3d only for FP16/BF16 (MIOpen solver requirement)
+  auto weight_dtype = weight.scalar_type();
+  bool is_fp16_or_bf16 = (weight_dtype == at::kHalf) || (weight_dtype == at::kBFloat16);
+  
+  if (suggest_nhwc && is_fp16_or_bf16) {
+    if (weight_ndim == 4) {
+      return at::MemoryFormat::ChannelsLast;
+    }
+    if (weight_ndim == 5) {
+      return at::MemoryFormat::ChannelsLast3d;
+    }
+  }
+
   return at::MemoryFormat::Contiguous;
 }
 
