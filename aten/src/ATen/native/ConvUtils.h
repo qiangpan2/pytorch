@@ -372,19 +372,23 @@ inline at::MemoryFormat miopen_conv_suggest_memory_format(const at::Tensor& inpu
   auto input_memory_format = input.suggest_memory_format();
   auto weight_memory_format = weight.suggest_memory_format();
   auto weight_ndim = weight.ndimension();
+  auto weight_dtype = weight.scalar_type();
+  bool is_fp16_or_bf16 = (weight_dtype == at::kHalf) || (weight_dtype == at::kBFloat16);
 
-  bool can_use_miopen_channels_last_2d = suggest_nhwc && (weight_ndim == 4) && (
-    (input_memory_format  == at::MemoryFormat::ChannelsLast) ||
-    (weight_memory_format == at::MemoryFormat::ChannelsLast)
-  );
+  bool can_use_miopen_channels_last_2d = suggest_nhwc && (weight_ndim == 4) &&
+    is_fp16_or_bf16 && (
+      (input_memory_format  == at::MemoryFormat::ChannelsLast) ||
+      (weight_memory_format == at::MemoryFormat::ChannelsLast)
+    );
   if (can_use_miopen_channels_last_2d) {
     return at::MemoryFormat::ChannelsLast;
   }
 
-  bool can_use_miopen_channels_last_3d = suggest_nhwc && (weight_ndim == 5) && (
-    (input_memory_format  == at::MemoryFormat::ChannelsLast3d) ||
-    (weight_memory_format == at::MemoryFormat::ChannelsLast3d)
-  );
+  bool can_use_miopen_channels_last_3d = suggest_nhwc && (weight_ndim == 5) &&
+    is_fp16_or_bf16 && (
+      (input_memory_format  == at::MemoryFormat::ChannelsLast3d) ||
+      (weight_memory_format == at::MemoryFormat::ChannelsLast3d)
+    );
   if (can_use_miopen_channels_last_3d) {
     return at::MemoryFormat::ChannelsLast3d;
   }
